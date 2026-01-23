@@ -99,8 +99,19 @@ def depthFirstSearch(problem:SearchProblem)->List[Direction]:
     '''
         INSÉREZ VOTRE SOLUTION À LA QUESTION 1 ICI
     '''
-
-    util.raiseNotDefined()
+    
+    stack = util.Stack()
+    stack.push((problem.getStartState(), []))
+    visited = set()
+    while not stack.isEmpty():
+        state, actions = stack.pop()
+        if state in visited: continue
+        if problem.isGoalState(state):
+            return actions
+        for successor in problem.getSuccessors(state):
+            stack.push((successor[0], actions + [successor[1]]))
+        visited.add(state)
+    return []
 
 
 def breadthFirstSearch(problem:SearchProblem)->List[Direction]:
