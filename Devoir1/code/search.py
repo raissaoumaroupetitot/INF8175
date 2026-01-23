@@ -110,8 +110,18 @@ def breadthFirstSearch(problem:SearchProblem)->List[Direction]:
     '''
         INSÉREZ VOTRE SOLUTION À LA QUESTION 2 ICI
     '''
-
-    util.raiseNotDefined()
+    queue = util.Queue()
+    queue.push((problem.getStartState(), []))
+    visited = set()
+    while not queue.isEmpty():
+        state, actions = queue.pop()
+        if state in visited: continue
+        if problem.isGoalState(state):
+            return actions
+        for successor in problem.getSuccessors(state):
+            queue.push((successor[0], actions + [successor[1]]))
+        visited.add(state)
+    return []
 
 def uniformCostSearch(problem:SearchProblem)->List[Direction]:
     """Search the node of least total cost first."""
@@ -121,7 +131,18 @@ def uniformCostSearch(problem:SearchProblem)->List[Direction]:
         INSÉREZ VOTRE SOLUTION À LA QUESTION 3 ICI
     '''
 
-    util.raiseNotDefined()
+    priorityQueue = util.PriorityQueue()
+    priorityQueue.push((problem.getStartState(), []), 0)
+    visited = set()
+    while not priorityQueue.isEmpty():
+        state, actions = priorityQueue.pop()
+        if state in visited: continue
+        if problem.isGoalState(state):
+            return actions
+        for successor in problem.getSuccessors(state):
+            priorityQueue.push((successor[0], actions + [successor[1]]), problem.getCostOfActions(actions + [successor[1]]))
+        visited.add(state)
+    return []
 
 def nullHeuristic(state:GameState, problem:SearchProblem=None)->List[Direction]:
     """
@@ -136,7 +157,18 @@ def aStarSearch(problem:SearchProblem, heuristic=nullHeuristic)->List[Direction]
         INSÉREZ VOTRE SOLUTION À LA QUESTION 4 ICI
     '''
 
-    util.raiseNotDefined()
+    priorityQueue = util.PriorityQueue()
+    priorityQueue.push((problem.getStartState(), []), heuristic(problem.getStartState(), problem) + 0)
+    visited = set()
+    while not priorityQueue.isEmpty():
+        state, actions = priorityQueue.pop()
+        if state in visited: continue
+        if problem.isGoalState(state):
+            return actions
+        for successor in problem.getSuccessors(state):
+            priorityQueue.push((successor[0], actions + [successor[1]]), problem.getCostOfActions(actions + [successor[1]]) + heuristic(successor[0], problem))
+        visited.add(state)
+    return []
 
 
 # Abbreviations
