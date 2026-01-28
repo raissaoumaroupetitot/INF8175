@@ -294,6 +294,7 @@ class CornersProblem(search.SearchProblem):
         '''
             INSÉREZ VOTRE SOLUTION À LA QUESTION 5 ICI
         '''
+        self.heuristicInfo = {}
 
 
     def getStartState(self):
@@ -306,7 +307,7 @@ class CornersProblem(search.SearchProblem):
             INSÉREZ VOTRE SOLUTION À LA QUESTION 5 ICI
         '''
         
-        util.raiseNotDefined()
+        return (self.startingPosition, ())
 
     def isGoalState(self, state):
         """
@@ -317,7 +318,8 @@ class CornersProblem(search.SearchProblem):
             INSÉREZ VOTRE SOLUTION À LA QUESTION 5 ICI
         '''
 
-        util.raiseNotDefined()
+        return len(state[1]) == len(self.corners)
+
 
     def getSuccessors(self, state):
         """
@@ -342,7 +344,16 @@ class CornersProblem(search.SearchProblem):
             '''
                 INSÉREZ VOTRE SOLUTION À LA QUESTION 5 ICI
             '''
-
+            x, y = state[0]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
+            if hitsWall: continue
+            nextPos = (nextx, nexty)
+            visitedCorners = list(state[1])
+            if nextPos in self.corners and nextPos not in visitedCorners:
+                visitedCorners.append(nextPos)
+            successors.append(((nextPos, tuple(visitedCorners)), action, 1))
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -379,8 +390,39 @@ def cornersHeuristic(state, problem):
     '''
         INSÉREZ VOTRE SOLUTION À LA QUESTION 6 ICI
     '''
-    
-    return 0
+    position, visited = state
+    cache = problem.heuristicInfo
+
+    # Unvisited corners
+    unvisited = [c for c in corners if c not in visited]
+    if not unvisited:
+        return 0
+
+    # If only one corner left → BFS directly
+    if len(unvisited) == 1:
+        return bfsDistance(position, unvisited[0], walls)
+
+    # --- Find farthest pair of unvisited corners (A, B) ---
+    maxDist = -1
+    A = B = None
+
+    for i, c1 in enumerate(unvisited):
+        for c2 in unvisited[i+1:]:
+            key = (c1, c2)
+            if key not in cache:
+                cache[key] = bfsDistance(c1, c2, walls)
+            d = cache[key]
+
+            if d > maxDist:
+                maxDist = d
+                A, B = c1, c2
+
+    # --- Pacman to closer of A or B ---
+    dPA = bfsDistance(position, A, walls)
+    dPB = bfsDistance(position, B, walls)
+
+    return min(dPA, dPB) + maxDist
+
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -477,7 +519,50 @@ def foodHeuristic(state, problem: FoodSearchProblem):
     '''
         INSÉREZ VOTRE SOLUTION À LA QUESTION 7 ICI
     '''
+    foods = foodGrid.asList()
+    walls = problem.walls
+    cache = problem.heuristicInfo
+
+    if not foods: return 0
+    if len(foods) == 1: return bfsDistance(position, foods[0], walls)
+
+    # --- Find farthest food pair (A, B) ---
+    maxDist = -1
+    A = B = None
+
+    for i, f1 in enumerate(foods):
+        for f2 in foods[i+1:]:
+            key = (f1, f2)
+            if key not in cache:
+                cache[key] = bfsDistance(f1, f2, walls)
+            d = cache[key]
+
+            if d > maxDist:
+                maxDist = d
+                A, B = f1, f2
 
 
-    return 0
+    # --- Pacman to closer of A or B ---
+    dPA = bfsDistance(position, A, walls)
+    dPB = bfsDistance(position, B, walls)
 
+    return min(dPA, dPB) + maxDist
+
+
+def bfsDistance(start, goal, walls):
+        queue = util.Queue()
+        queue.push((start, 0))
+        visited = set([start])
+
+        while not queue.isEmpty():
+            (x, y), dist = queue.pop()
+            if (x, y) == goal:
+                return dist
+
+            for dx, dy in [(1,0),(-1,0),(0,1),(0,-1)]:
+                nx, ny = x + dx, y + dy
+                if not walls[nx][ny] and (nx, ny) not in visited:
+                    visited.add((nx, ny))
+                    queue.push(((nx, ny), dist + 1))
+
+        return 999999
