@@ -384,45 +384,28 @@ def cornersHeuristic(state, problem):
     shortest path from the state to a goal of the problem; i.e.  it should be
     admissible (as well as consistent).
     """
-    corners = problem.corners # These are the corner coordinates
-    walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
-
-    '''
-        INSÉREZ VOTRE SOLUTION À LA QUESTION 6 ICI
-    '''
+    corners = problem.corners
+    walls = problem.walls
     position, visited = state
-    cache = problem.heuristicInfo
-
-    # Unvisited corners
     unvisited = [c for c in corners if c not in visited]
     if not unvisited:
         return 0
-
-    # If only one corner left → BFS directly
     if len(unvisited) == 1:
         return bfsDistance(position, unvisited[0], walls)
-
-    # --- Find farthest pair of unvisited corners (A, B) ---
     maxDist = -1
     A = B = None
-
     for i, c1 in enumerate(unvisited):
         for c2 in unvisited[i+1:]:
             key = (c1, c2)
-            if key not in cache:
-                cache[key] = bfsDistance(c1, c2, walls)
-            d = cache[key]
-
+            if key not in problem.heuristicInfo:
+                problem.heuristicInfo[key] = bfsDistance(c1, c2, walls)
+            d = problem.heuristicInfo[key]
             if d > maxDist:
                 maxDist = d
                 A, B = c1, c2
-
-    # --- Pacman to closer of A or B ---
     dPA = bfsDistance(position, A, walls)
     dPB = bfsDistance(position, B, walls)
-
     return min(dPA, dPB) + maxDist
-
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -444,7 +427,7 @@ class FoodSearchProblem:
         self.walls = startingGameState.getWalls()
         self.startingGameState = startingGameState
         self._expanded = 0 # DO NOT CHANGE
-        self.heuristicInfo = {} # A dictionary for the heuristic to store information
+        self.heuristicInfo = {}
 
     def getStartState(self):
         return self.start
@@ -515,54 +498,38 @@ def foodHeuristic(state, problem: FoodSearchProblem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-
-    '''
-        INSÉREZ VOTRE SOLUTION À LA QUESTION 7 ICI
-    '''
     foods = foodGrid.asList()
     walls = problem.walls
-    cache = problem.heuristicInfo
-
     if not foods: return 0
     if len(foods) == 1: return bfsDistance(position, foods[0], walls)
-
-    # --- Find farthest food pair (A, B) ---
     maxDist = -1
     A = B = None
-
     for i, f1 in enumerate(foods):
         for f2 in foods[i+1:]:
             key = (f1, f2)
-            if key not in cache:
-                cache[key] = bfsDistance(f1, f2, walls)
-            d = cache[key]
-
+            if key not in problem.heuristicInfo:
+                problem.heuristicInfo[key] = bfsDistance(f1, f2, walls)
+            d = problem.heuristicInfo[key]
             if d > maxDist:
                 maxDist = d
                 A, B = f1, f2
-
-
-    # --- Pacman to closer of A or B ---
     dPA = bfsDistance(position, A, walls)
     dPB = bfsDistance(position, B, walls)
-
     return min(dPA, dPB) + maxDist
 
 
 def bfsDistance(start, goal, walls):
-        queue = util.Queue()
-        queue.push((start, 0))
-        visited = set([start])
+    queue = util.Queue()
+    queue.push((start, 0))
+    visited = set([start])
+    while not queue.isEmpty():
+        (x, y), dist = queue.pop()
+        if (x, y) == goal:
+            return dist
+        for dx, dy in [(1,0),(-1,0),(0,1),(0,-1)]:
+            nx, ny = x + dx, y + dy
+            if not walls[nx][ny] and (nx, ny) not in visited:
+                visited.add((nx, ny))
+                queue.push(((nx, ny), dist + 1))
 
-        while not queue.isEmpty():
-            (x, y), dist = queue.pop()
-            if (x, y) == goal:
-                return dist
-
-            for dx, dy in [(1,0),(-1,0),(0,1),(0,-1)]:
-                nx, ny = x + dx, y + dy
-                if not walls[nx][ny] and (nx, ny) not in visited:
-                    visited.add((nx, ny))
-                    queue.push(((nx, ny), dist + 1))
-
-        return 999999
+    return 999999

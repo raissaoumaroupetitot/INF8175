@@ -96,10 +96,6 @@ def depthFirstSearch(problem:SearchProblem)->List[Direction]:
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
 
-    '''
-        INSÉREZ VOTRE SOLUTION À LA QUESTION 1 ICI
-    '''
-    
     stack = util.Stack()
     stack.push((problem.getStartState(), []))
     visited = set()
@@ -116,11 +112,6 @@ def depthFirstSearch(problem:SearchProblem)->List[Direction]:
 
 def breadthFirstSearch(problem:SearchProblem)->List[Direction]:
     """Search the shallowest nodes in the search tree first."""
-
-
-    '''
-        INSÉREZ VOTRE SOLUTION À LA QUESTION 2 ICI
-    '''
     queue = util.Queue()
     queue.push((problem.getStartState(), []))
     visited = set()
@@ -136,12 +127,6 @@ def breadthFirstSearch(problem:SearchProblem)->List[Direction]:
 
 def uniformCostSearch(problem:SearchProblem)->List[Direction]:
     """Search the node of least total cost first."""
-
-
-    '''
-        INSÉREZ VOTRE SOLUTION À LA QUESTION 3 ICI
-    '''
-
     priorityQueue = util.PriorityQueue()
     priorityQueue.push((problem.getStartState(), []), 0)
     visited = set()
@@ -164,10 +149,6 @@ def nullHeuristic(state:GameState, problem:SearchProblem=None)->List[Direction]:
 
 def aStarSearch(problem:SearchProblem, heuristic=nullHeuristic)->List[Direction]:
     """Search the node that has the lowest combined cost and heuristic first."""
-    '''
-        INSÉREZ VOTRE SOLUTION À LA QUESTION 4 ICI
-    '''
-
     priorityQueue = util.PriorityQueue()
     priorityQueue.push((problem.getStartState(), []), heuristic(problem.getStartState(), problem) + 0)
     visited = set()
