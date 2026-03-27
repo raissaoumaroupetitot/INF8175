@@ -1,4 +1,4 @@
-% NOM_ETUDIANT_1 (MATRICULE_1)
+% Raissa Oumarou Petitot (2180935)
 % NOM_ETUDIANT_2 (MATRICULE_2)
 
 include "globals.mzn"; 
@@ -36,6 +36,18 @@ var int: fin_projet;
 %-----------------------------------------------------------------------------%
 % Partie étudiant
 %-----------------------------------------------------------------------------%
+
+constraint forall(i in 1..n) (
+  fin_tache[i] = debut_tache[i] + duree_tache[i]
+);
+constraint forall(i in 1..n) (
+  fin_tache[i] <= m
+);
+constraint cumulative(debut_tache, duree_tache, ressource_tache, limite);
+constraint cumulative(debut_tache, [1 | i in 1..n], [1 | i in 1..n], 2);
+constraint maximum(fin_projet, fin_tache);
+
+solve minimize fin_projet;
 
 
 %-----------------------------------------------------------------------------%
