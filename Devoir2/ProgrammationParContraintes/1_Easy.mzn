@@ -1,5 +1,5 @@
 % Raissa Oumarou Petitot (2180935)
-% NOM_ETUDIANT_2 (MATRICULE_2)
+% Noah Mesple (2487453)
 
 include "globals.mzn";
 
