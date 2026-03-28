@@ -1,4 +1,4 @@
-% NOM_ETUDIANT_1 (MATRICULE_1)
+% Raissa Oumarou Petitot (2180935)
 % NOM_ETUDIANT_2 (MATRICULE_2)
 
 include "globals.mzn";
@@ -23,8 +23,18 @@ var int: p;
 %-----------------------------------------------------------------------------%
 % Partie étudiant
 %-----------------------------------------------------------------------------%
+constraint p = chiffres[2]*chiffres[3]*chiffres[4];
+constraint chiffres[1] = nombre div 1000;
+constraint chiffres[2] = (nombre div 100) mod 10;
+constraint chiffres[3] = (nombre div 10) mod 10;
+constraint chiffres[4] = nombre mod 10;
+constraint chiffres[1] > chiffres[2];
+constraint chiffres[2] > chiffres[4];
+constraint chiffres[3] < chiffres[4];
+constraint chiffres[4] mod 2 = 0;
+constraint sum(chiffres) > 15;
 
-
+solve minimize p;
 %-----------------------------------------------------------------------------%
 
 output [
