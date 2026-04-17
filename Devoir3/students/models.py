@@ -66,6 +66,12 @@ class RegressionModel(object):
     def __init__(self) -> None:
         # Initialize your model parameters here
         "*** TODO: COMPLETE HERE FOR QUESTION 2 ***"
+        h = 50 # dimensions des couches cachées
+        self.w1 = nn.Parameter(1,h)
+        self.b1 = nn.Parameter(1,h)
+        self.w2 = nn.Parameter(h, 1)
+        self.b2 = nn.Parameter(1,1)
+        
 
     def run(self, x: nn.Constant) -> nn.Node:
         """
@@ -77,6 +83,10 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** TODO: COMPLETE HERE FOR QUESTION 2 ***"
+        a1 = nn.AddBias(nn.Linear(x, self.w1), self.b1)
+        r1 = nn.ReLU(a1)
+        a2 = nn.AddBias(nn.Linear(r1, self.w2), self.b2)
+        return a2
 
     def get_loss(self, x: nn.Constant, y: nn.Constant) -> nn.Node:
         """
@@ -89,12 +99,24 @@ class RegressionModel(object):
         Returns: a loss node
         """
         "*** TODO: COMPLETE HERE FOR QUESTION 2 ***"
+        prediction = self.run(x)
+        return nn.SquareLoss(prediction,y)
 
     def train(self, dataset: RegressionDataset) -> None:
-        """
-        Trains the model.
-        """
-        "*** TODO: COMPLETE HERE FOR QUESTION 2 ***"
+        batch_size = 20
+        learning_rate = -0.03
+
+        for x, y in dataset.iterate_forever(batch_size):
+            loss = self.get_loss(x, y)
+            parameters = [self.w1, self.b1, self.w2, self.b2]
+            gradient = nn.gradients(loss, parameters)
+            for i in range(len(parameters)):
+                parameters[i].update(gradient[i], learning_rate)
+
+            #verification sur tout le dataset
+            global_loss = self.get_loss(nn.Constant(dataset.x), nn.Constant(dataset.y))
+            if nn.as_scalar(global_loss) < 0.02:
+                break
 
 
 class DigitClassificationModel(object):
